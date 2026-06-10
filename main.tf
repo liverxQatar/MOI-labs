@@ -24,12 +24,12 @@ provider "google" {
 
 
 resource "google_folder" "moi_training" {
-  display_name = "Training Academy"
+  display_name = "MOI Training Academy"
   parent       = "organizations/${var.org_id}"
 }
 
 resource "google_folder" "resources" {
-  display_name = "Shared services"
+  display_name = "Shared Resources"
   parent       = google_folder.moi_training.name
 }
 
@@ -44,7 +44,7 @@ resource "random_id" "resources" {
 }
 
 resource "google_project" "resources" {
-  name            = "Shared Services"
+  name            = "prj-ta-resources-01"
   project_id      = "${var.resources_project_prefix}-${random_id.resources.hex}"
   folder_id       = google_folder.resources.folder_id
   billing_account = var.billing_account_id
@@ -106,7 +106,7 @@ resource "google_project_service" "apis" {
 
 resource "google_storage_bucket" "tf_configs" {
   project                     = google_project.resources.project_id
-  name                        = "${google_project.resources.project_id}-tf-configs"
+  name                        = "bkt-${google_project.resources.project_id}-tf-configs"
   location                    = var.region
   storage_class               = "STANDARD"
   uniform_bucket_level_access = true
@@ -140,7 +140,7 @@ resource "google_storage_bucket" "lab_artifacts" {
 
 
 resource "google_project" "hub" {
-  name            = "Hub Project"
+  name            = "prj-ta-studhub-01"
   project_id      = var.hub_project_id
   folder_id       = google_folder.students.folder_id
   billing_account = var.billing_account_id
@@ -171,7 +171,7 @@ resource "google_compute_shared_vpc_host_project" "hub" {
 
 
 resource "google_compute_network" "hub_vpc" {
-  name                    = "hub-vpc"
+  name                    = "vpc-ta-svpc-wb-01"
   project                 = google_project.hub.project_id
   auto_create_subnetworks = false
 
@@ -179,7 +179,7 @@ resource "google_compute_network" "hub_vpc" {
 }
 
 resource "google_compute_subnetwork" "hub_subnet" {
-  name                     = "hub-subnet-${var.hub_region}"
+  name                     = "sn-ta-svpc-${var.hub_region}-wb-01"
   project                  = google_project.hub.project_id
   region                   = var.hub_region
   network                  = google_compute_network.hub_vpc.id
@@ -189,14 +189,14 @@ resource "google_compute_subnetwork" "hub_subnet" {
 
 
 resource "google_compute_router" "hub_router" {
-  name    = "hub-router"
+  name    = "cr-ta-${var.hub_region}-studhub-01"
   project = google_project.hub.project_id
   region  = var.hub_region
   network = google_compute_network.hub_vpc.id
 }
 
 resource "google_compute_router_nat" "hub_nat" {
-  name                               = "hub-nat"
+  name                               = "nat-ta-${var.hub_region}-studhub-01"
   project                            = google_project.hub.project_id
   router                             = google_compute_router.hub_router.name
   region                             = var.hub_region
@@ -218,7 +218,7 @@ resource "google_compute_router_nat" "hub_nat" {
 ###############################################################################
 
 resource "google_compute_network" "hub_vpc_compute" {
-  name                    = "hub-vpc-compute"
+  name                    = "vpc-ta-svpc-ci-01"
   project                 = google_project.hub.project_id
   auto_create_subnetworks = false
 
@@ -226,7 +226,7 @@ resource "google_compute_network" "hub_vpc_compute" {
 }
 
 resource "google_compute_subnetwork" "hub_subnet_compute" {
-  name                     = "hub-subnet-${var.hub_compute_region}"
+  name                     = "sn-ta-spvc-${var.hub_compute_region}-ci-01"
   project                  = google_project.hub.project_id
   region                   = var.hub_compute_region
   network                  = google_compute_network.hub_vpc_compute.id
@@ -235,14 +235,14 @@ resource "google_compute_subnetwork" "hub_subnet_compute" {
 }
 
 resource "google_compute_router" "hub_router_compute" {
-  name    = "hub-router-compute"
+  name    = "cr-ta-${var.hub_compute_region}-ci-01"
   project = google_project.hub.project_id
   region  = var.hub_compute_region
   network = google_compute_network.hub_vpc_compute.id
 }
 
 resource "google_compute_router_nat" "hub_nat_compute" {
-  name                               = "hub-nat-compute"
+  name                               = "nat-ta-${var.hub_compute_region}-ci-01"
   project                            = google_project.hub.project_id
   router                             = google_compute_router.hub_router_compute.name
   region                             = var.hub_compute_region

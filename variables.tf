@@ -50,7 +50,7 @@ variable "hub_region" {
 variable "hub_subnet_cidr" {
   description = "Primary IP CIDR range for the Hub shared subnet"
   type        = string
-  default     = "10.10.0.0/20"
+  default     = "10.10.10.0/24"
 }
 
 variable "hub_compute_region" {
@@ -62,5 +62,5 @@ variable "hub_compute_region" {
 variable "hub_compute_subnet_cidr" {
   description = "Primary IP CIDR range for the me-central1 compute subnet (must not overlap hub_subnet_cidr)"
   type        = string
-  default     = "10.20.0.0/20"
+  default     = "10.10.20.0/24"
 }
